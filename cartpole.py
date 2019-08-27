@@ -4,10 +4,10 @@ import numpy as np
 class Q_learning(object):
     def __init__(self):
         self.env = gym.make('InvertedPendulum-v2')
-        self.digitalied_num = 60
+        self.digitalied_num = 10
         self.steps = 200
         self.episodes = 10000000
-        self.goal_ave = -100
+        self.goal_ave = -150
         self.moving_ave_num = 10
         self.first_prob = 0.75
         self.moving_ave = np.full(self.moving_ave_num,-200)
@@ -22,8 +22,8 @@ class Q_learning(object):
         pram_low = [-2.4,-3.0,-0.5,-2.0]
         pram_high = [2.4,3.0,0.5,2.0]
         for i in range(self.env.observation_space.shape[0]):
-            #self.bin_pram.append(np.linspace(pram_low[i],pram_high[i],self.digitalied_num)[1:-1])
-            self.bin_pram.append(np.linspace(self.env.observation_space.low[i],self.env.observation_space.high[i],self.digitalied_num)[1:-1])
+            self.bin_pram.append(np.linspace(pram_low[i],pram_high[i],self.digitalied_num)[1:-1])
+            #self.bin_pram.append(np.linspace(self.env.observation_space.low[i],self.env.observation_space.high[i],self.digitalied_num)[1:-1])
 
     def digitalie(self,obs):
         state = 0
@@ -59,7 +59,7 @@ class Q_learning(object):
                 
                 observation ,reward, done, info = self.env.step(action-3)
                 if done:
-                    if i < 50:
+                    if i < 195:
                         reward = -200
                     else:
                         reward = 1
@@ -78,13 +78,13 @@ class Q_learning(object):
                     if max_step < i:
                         max_step = i
                     self.moving_ave = np.hstack((self.moving_ave[1:],self.reward_of_episode))
-                    print("--------------")
+                    print("----------------")
                     print("episode: {}".format(episode+1))
                     print("reward : {}".format(self.reward_of_episode))
                     print("step   : {}".format(i+1))
                     print("maxstep: {}".format(max_step+1))
                     print("average: {}".format(self.moving_ave.mean()))
-                    print("--------------")
+                    print("----------------")
                     if self.learning_finish:
                         self.render_flag = True
                     break

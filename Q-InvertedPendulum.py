@@ -90,8 +90,8 @@ class Q_learning(object):
             if self.moving_ave.mean() >= self.goal_ave or max_step > self.goal_ave:
                 if self.learning_finish:
                     break
-                print("Learning is finished!!")
-                print("episode: {}".format(episode+1))
+                print("\nLearning is finished!!")
+                print("episode: {}\n".format(episode+1))
                 self.learning_finish = True
 
 

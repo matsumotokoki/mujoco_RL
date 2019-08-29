@@ -9,7 +9,7 @@ class Q_learning(object):
         self.digitalied_num = 10
         self.steps = 200
         self.episodes = 1000000
-        self.goal_ave = 195
+        self.goal_ave = 190
         self.moving_ave_num = 10
         self.first_prob = 0.75
         self.action_num = 3
@@ -19,8 +19,8 @@ class Q_learning(object):
         self.reward_of_episode = 0
         self.render_flag = False
         self.learning_finish = False
-        self.alpha = 0.8
-        self.gamma = 0.99
+        self.alpha = 0.6
+        self.gamma = 0.8
         self.bin_pram = []
         pram_low =  [-0.5,-0.3,-0.3,-0.3]
         pram_high = [0.5,0.3,0.3,0.3]
@@ -54,6 +54,7 @@ class Q_learning(object):
         return q_table
 
     def run(self):
+        print()
         max_step = 0
         for episode in range(self.episodes):
             obs = self.env.reset()
@@ -66,6 +67,10 @@ class Q_learning(object):
                     self.env.render()
                 
                 observation ,reward, done, info = self.env.step(action-1)
+                # if i > 190:
+                #     reward = 100
+                # elif i > 100:
+                #     reward = 2
                 self.reward_of_episode += reward
                 
                 next_state = self.digitalie(observation)
@@ -77,13 +82,10 @@ class Q_learning(object):
                     if max_step < i:
                         max_step = i
                     self.moving_ave = np.hstack((self.moving_ave[1:],self.reward_of_episode))
-                    print("----------------")
-                    print("episode: {}".format(episode+1))
-                    print("reward : {}".format(self.reward_of_episode))
-                    print("step   : {}".format(i+1))
-                    print("maxstep: {}".format(max_step+1))
-                    print("average: {}".format(self.moving_ave.mean()))
-                    print("----------------")
+                    sys.stdout.write("\repisode:%5d, reward:%3d, step:%3d, max_step:%3d, average:%3d"%(episode+1,self.reward_of_episode,i+1,max_step+1,self.moving_ave.mean()))
+                    sys.stdout.flush()
+                    time.sleep(0.001)
+                    
                     if self.learning_finish:
                         self.render_flag = True
                     break

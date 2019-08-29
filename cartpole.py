@@ -7,20 +7,20 @@ class Q_learning(object):
         self.digitalied_num = 10
         self.steps = 200
         self.episodes = 10000000
-        self.goal_ave = -150
+        self.goal_ave = 195
         self.moving_ave_num = 10
         self.first_prob = 0.75
         self.moving_ave = np.full(self.moving_ave_num,-200)
         self.q_table = np.random.uniform(low=-1,high=1,size=(self.digitalied_num\
-                                                        **self.env.observation_space.shape[0],7))
+                                                        **self.env.observation_space.shape[0],3))
         self.reward_of_episode = 0
         self.render_flag = False
         self.learning_finish = False
         self.alpha = 0.8
         self.gamma = 0.99
         self.bin_pram = []
-        pram_low = [-2.4,-3.0,-0.5,-2.0]
-        pram_high = [2.4,3.0,0.5,2.0]
+        pram_low = [-0.5,-0.3,-0.3,-0.3]
+        pram_high = [0.5,0.3,0.3,0.3]
         for i in range(self.env.observation_space.shape[0]):
             self.bin_pram.append(np.linspace(pram_low[i],pram_high[i],self.digitalied_num)[1:-1])
             #self.bin_pram.append(np.linspace(self.env.observation_space.low[i],self.env.observation_space.high[i],self.digitalied_num)[1:-1])
@@ -33,14 +33,19 @@ class Q_learning(object):
     
     def decide_action(self,next_state,episode):
         epsilon = self.first_prob * (1/(episode+1))
+        epsilon = 0.1 
         if epsilon <= np.random.uniform(0,1):
             next_action = np.argmax(self.q_table[next_state])
         else:
-            next_action = int(round(self.env.action_space.sample()[0]))
+            # next_action = int(round(self.env.action_space.sample()[0]))
+            next_action = np.random.choice(3)
         return next_action
 
-    def update_Q_table(self,next_state,state,action,reward,q_table):
-        next_max_q = max(q_table[next_state])
+    def update_Q_table(self,next_state,state,action,reward,q_table,done):
+        if not done:
+            next_max_q = max(q_table[next_state])
+        else:
+            next_max_q = 0
         q_table[state,action] = (1 - self.alpha) * (q_table[state,action]) + \
                                     self.alpha * (reward + self.gamma *next_max_q)
         return q_table
@@ -57,21 +62,23 @@ class Q_learning(object):
                 if self.render_flag or self.learning_finish:
                     self.env.render()
                 
-                observation ,reward, done, info = self.env.step(action-3)
-                if done:
-                    if i < 195:
-                        reward = -200
-                    else:
-                        reward = 1
-                else:
-                    reward = 1
+                observation ,reward, done, info = self.env.step(action-1)
+                #print(observation)
+                # if done:
+                #     if i < 195:
+                #         reward = -200
+                #     else:
+                #         reward = 1
+                # else:
+                #     reward = 1
 
                 self.reward_of_episode += reward
                 
                 next_state = self.digitalie(obs)
-                self.q_table = self.update_Q_table(next_state,state,action,reward,self.q_table)
+                self.q_table = self.update_Q_table(next_state,state,action,reward,self.q_table,done)
                 action = self.decide_action(next_state,episode)
                 state = next_state
+                # print(observation)
                 
 
                 if done:

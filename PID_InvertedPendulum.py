@@ -4,10 +4,9 @@ import numpy as np
 import sys
 import time
 
+env = gym.make('InvertedPendulum-v2')
 Render_Flag = True
 max_step = 0
-env = gym.make('InvertedPendulum-v2')
-env.reset()
 for i in range(20000):
     env.reset()
     Kp = 6.0

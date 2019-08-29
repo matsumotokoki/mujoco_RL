@@ -1,25 +1,28 @@
 import gym
 import numpy as np
+import time
+import sys
 
 class Q_learning(object):
     def __init__(self):
         self.env = gym.make('InvertedPendulum-v2')
         self.digitalied_num = 10
         self.steps = 200
-        self.episodes = 10000000
+        self.episodes = 1000000
         self.goal_ave = 195
         self.moving_ave_num = 10
         self.first_prob = 0.75
-        self.moving_ave = np.full(self.moving_ave_num,-200)
+        self.action_num = 3
+        self.moving_ave = np.full(self.moving_ave_num,0)
         self.q_table = np.random.uniform(low=-1,high=1,size=(self.digitalied_num\
-                                                        **self.env.observation_space.shape[0],3))
+                                                        **self.env.observation_space.shape[0],self.action_num))
         self.reward_of_episode = 0
         self.render_flag = False
         self.learning_finish = False
         self.alpha = 0.8
         self.gamma = 0.99
         self.bin_pram = []
-        pram_low = [-0.5,-0.3,-0.3,-0.3]
+        pram_low =  [-0.5,-0.3,-0.3,-0.3]
         pram_high = [0.5,0.3,0.3,0.3]
         for i in range(self.env.observation_space.shape[0]):
             self.bin_pram.append(np.linspace(pram_low[i],pram_high[i],self.digitalied_num)[1:-1])
@@ -28,7 +31,7 @@ class Q_learning(object):
     def digitalie(self,obs):
         state = 0
         for i in range(self.env.observation_space.shape[0]):
-            state = np.digitize(obs[i],self.bin_pram[i]) * (self.digitalied_num ** i)
+            state += np.digitize(obs[i],self.bin_pram[i]) * (self.digitalied_num ** i)
         return state
     
     def decide_action(self,next_state,episode):
@@ -38,7 +41,7 @@ class Q_learning(object):
             next_action = np.argmax(self.q_table[next_state])
         else:
             # next_action = int(round(self.env.action_space.sample()[0]))
-            next_action = np.random.choice(3)
+            next_action = np.random.choice(self.action_num)
         return next_action
 
     def update_Q_table(self,next_state,state,action,reward,q_table,done):
@@ -47,7 +50,7 @@ class Q_learning(object):
         else:
             next_max_q = 0
         q_table[state,action] = (1 - self.alpha) * (q_table[state,action]) + \
-                                    self.alpha * (reward + self.gamma *next_max_q)
+                                    self.alpha * (reward + self.gamma * next_max_q)
         return q_table
 
     def run(self):
@@ -63,23 +66,12 @@ class Q_learning(object):
                     self.env.render()
                 
                 observation ,reward, done, info = self.env.step(action-1)
-                #print(observation)
-                # if done:
-                #     if i < 195:
-                #         reward = -200
-                #     else:
-                #         reward = 1
-                # else:
-                #     reward = 1
-
                 self.reward_of_episode += reward
                 
-                next_state = self.digitalie(obs)
+                next_state = self.digitalie(observation)
                 self.q_table = self.update_Q_table(next_state,state,action,reward,self.q_table,done)
                 action = self.decide_action(next_state,episode)
                 state = next_state
-                # print(observation)
-                
 
                 if done:
                     if max_step < i:

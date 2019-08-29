@@ -11,16 +11,16 @@ class Q_learning(object):
         self.episodes = 1000000
         self.goal_ave = 190
         self.moving_ave_num = 10
-        self.first_prob = 0.75
-        self.action_num = 3
+        self.first_prob = 0.5
+        self.action_num = 7  #3~7
         self.moving_ave = np.full(self.moving_ave_num,0)
         self.q_table = np.random.uniform(low=-1,high=1,size=(self.digitalied_num\
                                                         **self.env.observation_space.shape[0],self.action_num))
         self.reward_of_episode = 0
         self.render_flag = False
         self.learning_finish = False
-        self.alpha = 0.6
-        self.gamma = 0.8
+        self.alpha = 0.7
+        self.gamma = 0.9
         self.bin_pram = []
         pram_low =  [-0.5,-0.3,-0.3,-0.3]
         pram_high = [0.5,0.3,0.3,0.3]
@@ -36,7 +36,8 @@ class Q_learning(object):
     
     def decide_action(self,next_state,episode):
         epsilon = self.first_prob * (1/(episode+1))
-        epsilon = 0.1 
+        if epsilon < 0.1:
+            epsilon = 0.1
         if epsilon <= np.random.uniform(0,1):
             next_action = np.argmax(self.q_table[next_state])
         else:
@@ -66,11 +67,7 @@ class Q_learning(object):
                 if self.render_flag or self.learning_finish:
                     self.env.render()
                 
-                observation ,reward, done, info = self.env.step(action-1)
-                # if i > 190:
-                #     reward = 100
-                # elif i > 100:
-                #     reward = 2
+                observation ,reward, done, info = self.env.step(action-3)
                 self.reward_of_episode += reward
                 
                 next_state = self.digitalie(observation)
@@ -90,7 +87,9 @@ class Q_learning(object):
                         self.render_flag = True
                     break
 
-            if self.moving_ave.mean() >= self.goal_ave:
+            if self.moving_ave.mean() >= self.goal_ave or max_step > self.goal_ave:
+                if self.learning_finish:
+                    break
                 print("Learning is finished!!")
                 print("episode: {}".format(episode+1))
                 self.learning_finish = True

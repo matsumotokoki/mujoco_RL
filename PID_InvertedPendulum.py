@@ -24,6 +24,7 @@ for i in range(20000):
             env.render()
         obs, reward, done, info = env.step(-action)
         action_old = action
+        print(action)
         e2 = e1
         e1 = e
         e = goal - obs[1] 

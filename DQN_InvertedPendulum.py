@@ -140,7 +140,7 @@ for episode in range(num_episodes):
             if max_step < t:
                 max_step = t
             total_reward_vec = np.hstack((total_reward_vec[1:], episode_reward))
-            print('{:5d} Episode finnished after {:6.2f} time steps, ave {:6.2f}, max {:4d}'.format(episode,t+1,total_reward_vec.mean(),max_step+1))
+            print('{:5d} Episode finished, {:6.2f} steps, ave: {:6.2f}, max: {:4d}'.format(episode,t+1,total_reward_vec.mean(),max_step+1),flush=True)
             # if episode == 0:
             #     print()
             # sys.stdout.write('\r{:5d} Episode finnished after {:4d} time steps, ave {:5.2f}, max {:4d}'\

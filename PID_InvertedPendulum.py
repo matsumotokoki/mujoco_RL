@@ -31,9 +31,10 @@ for i in range(20000):
         if done or t >= 199:
             if max_step < t:
                 max_step = t
-            sys.stdout.write("\repisode:%5d, step:%3d, max:%3d"%(i+1,t+1,max_step+1))
-            sys.stdout.flush()
-            time.sleep(0.1)
+            print("episode:%5d, step:%3d, max:%3d"%(i+1,t+1,max_step+1))
+            # sys.stdout.write("\repisode:%5d, step:%3d, max:%3d"%(i+1,t+1,max_step+1))
+            # sys.stdout.flush()
+            # time.sleep(0.1)
             break
 
 

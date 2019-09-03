@@ -19,7 +19,7 @@ class Q_learning(object):
         self.reward_of_episode = 0
         self.render_flag = False
         self.learning_finish = False
-        self.alpha = 0.7
+        self.alpha = 0.1
         self.gamma = 0.9
         self.bin_pram = []
         pram_low =  [-0.5,-0.3,-0.3,-0.3]

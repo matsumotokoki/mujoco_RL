@@ -19,7 +19,7 @@ def huberloss(y_true, y_pred):
     return K.mean(loss)
 
 class QNetwork:
-    def __init__(self,learning_rate=0.01, state_size=4,action_size=3,hidden_size=10):
+    def __init__(self,learning_rate=0.01, state_size=4,action_size=2,hidden_size=10):
         self.action_size = action_size
         self.model = Sequential()
         self.model.add(Dense(hidden_size,activation='relu',input_dim=state_size))
@@ -64,19 +64,18 @@ class Memory:
 
 class Actor:
     def get_action(self, state, episode, mainQN):
-        epislon = 0.001 + 0.9 /(1.0+episode)
+        epislon = 0.01 + 0.9 /(1.0+episode*0.1)
         if epislon <= np.random.uniform(0,1):
             reTargetQs = mainQN.model.predict(state)[0]
             action = np.argmax(reTargetQs)
 
         else:
-            action = np.random.choice(3)
+            action = np.random.choice(2)
 
         return action
 
 METHOD_STR = "DDQN" #DQN or DDQN
-LENDER_FLAG = True
-
+RENDER_FLAG = True
 env = gym.make('InvertedPendulum-v2')
 num_episodes = 300000
 max_number_of_steps = 200
@@ -86,42 +85,40 @@ total_reward_vec = np.zeros(num_consecutive_iterations)
 gamma = 0.99
 islearnd = False
 isrender = False
-
 hidden_size = 16
-learning_rate = 0.00001
+learning_rate = 0.0001
 memory_size = 10000
-batch_size = 32
+batch_size = 100
 
 max_step = 0
 
 mainQN = QNetwork(hidden_size=hidden_size, learning_rate=learning_rate)
 targetQN = QNetwork(hidden_size=hidden_size, learning_rate=learning_rate)
-
+#plot_model(mainQN.model, to_file='Qnetwork.png', show_shapes=True) 
 memory = Memory(max_size = memory_size)
 actor = Actor()
 
 for episode in range(num_episodes):
     env.reset()
+    # state, reward, done, info = env.step(np.random.choice([-1,1]))
     state, reward, done, info = env.step(env.action_space.sample())
     state = np.reshape(state, [1,4])
     episode_reward = 0
-
     targetQN.model.set_weights(mainQN.model.get_weights())
 
     for t in range(max_number_of_steps):
-        if islearnd and LENDER_FLAG:
+        if islearnd and RENDER_FLAG:
             env.render()
             time.sleep(0.01)
 
         action = actor.get_action(state, episode, mainQN)
-        # next_state, reward, done , info = env.step(1 if action==1 else -1)
-        next_state, reward, done , info = env.step(action-1)
+        next_state, reward, done , info = env.step((1 if action==1 else -1))
         next_state = np.reshape(next_state,[1,4])
 
         if done:
             next_state = np.zeros(state.shape)
             if t < 195:
-                reward - -1
+                reward = -1
             else:
                 reward = 1
         else:
@@ -143,17 +140,17 @@ for episode in range(num_episodes):
             if max_step < t:
                 max_step = t
             total_reward_vec = np.hstack((total_reward_vec[1:], episode_reward))
-            # print('{:5d} Episode finnished after {:5f} time steps, ave {:5f}'.format(episode,t+1,total_reward_vec.mean()))
-            if episode == 0:
-                print()
-            sys.stdout.write('\r{:5d} Episode finnished after {:4d} time steps, ave {:5.2f}, max {:4d}'\
-                    .format(episode,t+1,total_reward_vec.mean(),max_step+1))
-            sys.stdout.flush()
-            time.sleep(0.0001)
+            print('{:5d} Episode finnished after {:6.2f} time steps, ave {:6.2f}, max {:4d}'.format(episode,t+1,total_reward_vec.mean(),max_step+1))
+            # if episode == 0:
+            #     print()
+            # sys.stdout.write('\r{:5d} Episode finnished after {:4d} time steps, ave {:5.2f}, max {:4d}'\
+            #         .format(episode,t+1,total_reward_vec.mean(),max_step+1))
+            # sys.stdout.flush()
+            # time.sleep(0.0001)
             break
 
     if total_reward_vec.mean() >= goal_average_reward:
         print('\nEpisode {:5d} train agent successfuly!\n'.format(episode))
         islearnd = True
-        if isrender:
+        if not isrender:
             isrender = True

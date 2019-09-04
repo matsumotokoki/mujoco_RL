@@ -100,7 +100,6 @@ actor = Actor()
 
 for episode in range(num_episodes):
     env.reset()
-    # state, reward, done, info = env.step(np.random.choice([-1,1]))
     state, reward, done, info = env.step(env.action_space.sample())
     state = np.reshape(state, [1,4])
     episode_reward = 0
@@ -112,16 +111,14 @@ for episode in range(num_episodes):
             time.sleep(0.01)
 
         action = actor.get_action(state, episode, mainQN)
-        # next_state, reward, done , info = env.step((1 if action==1 else -1))
         next_state, reward, done , info = env.step((action-3))
         next_state = np.reshape(next_state,[1,4])
 
-        if done:
+        if t == 199:
+            reward = 1
+        elif done:
             next_state = np.zeros(state.shape)
-            if t < 195:
-                reward = -1
-            else:
-                reward = 1
+            reward = -1
         else:
             reward = 0
 
@@ -142,12 +139,6 @@ for episode in range(num_episodes):
                 max_step = t
             total_reward_vec = np.hstack((total_reward_vec[1:], episode_reward))
             print('{:5d} Episode finished, {:6.2f} steps, ave: {:6.2f}, max: {:4d}'.format(episode,t+1,total_reward_vec.mean(),max_step+1),flush=True)
-            # if episode == 0:
-            #     print()
-            # sys.stdout.write('\r{:5d} Episode finnished after {:4d} time steps, ave {:5.2f}, max {:4d}'\
-            #         .format(episode,t+1,total_reward_vec.mean(),max_step+1))
-            # sys.stdout.flush()
-            # time.sleep(0.0001)
             break
 
     if total_reward_vec.mean() >= goal_average_reward:

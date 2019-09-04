@@ -19,7 +19,7 @@ def huberloss(y_true, y_pred):
     return K.mean(loss)
 
 class QNetwork:
-    def __init__(self,learning_rate=0.01, state_size=4,action_size=2,hidden_size=10):
+    def __init__(self,learning_rate=0.01, state_size=4,action_size=7,hidden_size=10):
         self.action_size = action_size
         self.model = Sequential()
         self.model.add(Dense(hidden_size,activation='relu',input_dim=state_size))
@@ -70,7 +70,7 @@ class Actor:
             action = np.argmax(reTargetQs)
 
         else:
-            action = np.random.choice(2)
+            action = np.random.choice(7)
 
         return action
 
@@ -112,7 +112,8 @@ for episode in range(num_episodes):
             time.sleep(0.01)
 
         action = actor.get_action(state, episode, mainQN)
-        next_state, reward, done , info = env.step((1 if action==1 else -1))
+        # next_state, reward, done , info = env.step((1 if action==1 else -1))
+        next_state, reward, done , info = env.step((action-3))
         next_state = np.reshape(next_state,[1,4])
 
         if done:
@@ -136,7 +137,7 @@ for episode in range(num_episodes):
         else:
             pass
 
-        if done:
+        if done or t >= 199:
             if max_step < t:
                 max_step = t
             total_reward_vec = np.hstack((total_reward_vec[1:], episode_reward))
@@ -150,7 +151,8 @@ for episode in range(num_episodes):
             break
 
     if total_reward_vec.mean() >= goal_average_reward:
-        print('\nEpisode {:5d} train agent successfuly!\n'.format(episode))
+        if not islearnd:
+            print('Episode {:5d} train agent successfuly!'.format(episode+1))
         islearnd = True
         if not isrender:
             isrender = True

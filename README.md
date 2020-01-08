@@ -1,4 +1,4 @@
-# mojuco_RL
+# mujoco_RL
 ## version
 python 3.7  
 mujoco 2.0
